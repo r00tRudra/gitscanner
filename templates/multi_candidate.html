@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Multi-Candidate Analyzer{% endblock %}
+{% block content %}
+<h2>Multi-Candidate Analyzer 🕵️‍♂️</h2>
+<p>Enter multiple GitHub usernames (one per line) and a target job role.</p>
+<form method="POST" action="{{ url_for('main.multi_candidate') }}" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="github_usernames">GitHub Usernames (one per line)</label>
+        <textarea class="form-control" name="github_usernames" rows="5" placeholder="username1\nusername2\n..."></textarea>
+    </div>
+    <div class="form-group">
+        <label for="job_role">Target Job Role</label>
+        <input type="text" class="form-control" name="job_role" placeholder="e.g. Backend Engineer">
+    </div>
+    <div class="form-group">
+        <label for="resume">Upload Resume (Optional)</label>
+        <input type="file" class="form-control" name="resume" accept=".pdf">
+    </div>
+    <button type="submit" class="btn btn-primary">Analyze Candidates</button>
+</form>
+{% if results %}
+<div class="results">
+    <h3>Evaluation Results</h3>
+    {{ results | safe }}
+</div>
+{% endif %}
+{% endblock %}

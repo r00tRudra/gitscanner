@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Single Candidate Analyzer{% endblock %}
+{% block content %}
+<h2>Single Candidate Analyzer</h2>
+<p>Analyze GitHub, LinkedIn profiles, and an optional resume for a role.</p>
+<form method="POST" action="{{ url_for('main.single_candidate') }}" enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="github_username">GitHub Username</label>
+                <input type="text" class="form-control" name="github_username" placeholder="e.g. Toufiq">
+            </div>
+            <div class="form-group">
+                <label for="linkedin_url">LinkedIn Profile (Optional)</label>
+                <input type="text" class="form-control" name="linkedin_url" placeholder="https://linkedin.com/in/...">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="job_role">Job Role</label>
+                <input type="text" class="form-control" name="job_role" placeholder="e.g. ML Engineer">
+            </div>
+            <div class="form-group">
+                <label for="resume">Upload Resume (Optional)</label>
+                <input type="file" class="form-control" name="resume" accept=".pdf">
+            </div>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Analyze Candidate 🔥</button>
+</form>
+{% if results %}
+<div class="results">
+    <h3>Evaluation Results</h3>
+    {{ results | safe }}
+</div>
+{% endif %}
+{% endblock %}

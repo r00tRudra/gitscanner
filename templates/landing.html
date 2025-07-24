@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitScanner - Analyze GitHub Smarter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f2f2f2;
+      color: #333;
+    }
+
+    header {
+      background-color: #222;
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .container {
+      padding: 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+    }
+
+    p {
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: 1rem auto;
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 1.5rem;
+      padding: 0.8rem 1.5rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+
+    footer {
+      background-color: #222;
+      color: #bbb;
+      text-align: center;
+      padding: 1rem;
+      margin-top: 3rem;
+    }
+
+    /* New styles for the button */
+    .evaluate-btn {
+      display: inline-block;
+      margin-top: 2rem;
+      padding: 0.8rem 1.5rem;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+
+    .evaluate-btn:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>GitScanner</h1>
+    <p>Your AI-powered GitHub Analyzer</p>
+  </header>
+
+  <div class="container">
+    <h1>Discover Insights from Repositories</h1>
+    <p>Analyze GitHub profiles, code quality, contributions, and more with our powerful AI tool. Just enter a GitHub link and let us do the rest!</p>
+    <a href="#start" class="btn">Get Started</a>
+    <!-- Button for evaluating multiple candidates -->
+    <a href="{{ url_for('main.multi_candidate_html') }}" class="evaluate-btn">
+      <button type="button">Evaluate Multiple Candidates</button>
+    </a>
+  </div>
+
+  <footer>
+    &copy; 2025 GitScanner. All rights reserved.
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+Flask
+Flask-SQLAlchemy
+PyYAML
+pdfplumber
+agno
+Werkzeug
+gunicorn         # If deploying to production (optional)
