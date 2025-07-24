@@ -9,8 +9,33 @@
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">🧠 Gitscanner</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.single_candidate') }}">Single Candidate</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.multi_candidate') }}">Multiple Candidates</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.candidates_list') }}">View All Candidates</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mt-4">
+        <div class="header text-center mb-4">
             <h1>🧠 Gitscanner</h1>
             <p>Elite GitHub + Resume Candidate Analyzer for Tech Hiring</p>
         </div>

@@ -5,3 +5,6 @@ pdfplumber
 agno
 Werkzeug
 gunicorn         # If deploying to production (optional)
+openai
+pygithub
+exa_py

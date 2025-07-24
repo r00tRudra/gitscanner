@@ -14,7 +14,7 @@
     }
 
     header {
-      background-color: #222;
+      background-color: #1a3c6d;
       color: white;
       padding: 1.5rem;
       text-align: center;
@@ -35,9 +35,16 @@
       margin: 1rem auto;
     }
 
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
     .btn {
       display: inline-block;
-      margin-top: 1.5rem;
       padding: 0.8rem 1.5rem;
       background-color: #007bff;
       color: white;
@@ -45,24 +52,26 @@
       border-radius: 5px;
       text-decoration: none;
       font-size: 1rem;
+      transition: all 0.3s ease;
     }
 
     .btn:hover {
       background-color: #0056b3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     footer {
-      background-color: #222;
+      background-color: #1a3c6d;
       color: #bbb;
       text-align: center;
       padding: 1rem;
       margin-top: 3rem;
     }
 
-    /* New styles for the button */
+    /* Button styles */
     .evaluate-btn {
       display: inline-block;
-      margin-top: 2rem;
       padding: 0.8rem 1.5rem;
       background-color: #28a745;
       color: white;
@@ -70,10 +79,31 @@
       border-radius: 5px;
       text-decoration: none;
       font-size: 1rem;
+      transition: all 0.3s ease;
     }
 
     .evaluate-btn:hover {
       background-color: #218838;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .visualize-btn {
+      display: inline-block;
+      padding: 0.8rem 1.5rem;
+      background-color: #6f42c1;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .visualize-btn:hover {
+      background-color: #5a32a3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
   </style>
 </head>
@@ -87,11 +117,12 @@
   <div class="container">
     <h1>Discover Insights from Repositories</h1>
     <p>Analyze GitHub profiles, code quality, contributions, and more with our powerful AI tool. Just enter a GitHub link and let us do the rest!</p>
-    <a href="#start" class="btn">Get Started</a>
-    <!-- Button for evaluating multiple candidates -->
-    <a href="{{ url_for('main.multi_candidate_html') }}" class="evaluate-btn">
-      <button type="button">Evaluate Multiple Candidates</button>
-    </a>
+    
+    <div class="button-group">
+      <a href="{{ url_for('main.single_candidate') }}" class="btn">Analyze Single Candidate</a>
+      <a href="{{ url_for('main.multi_candidate_html') }}" class="evaluate-btn">Evaluate Multiple Candidates</a>
+      <a href="{{ url_for('main.candidates_list') }}" class="visualize-btn">View All Candidates</a>
+    </div>
   </div>
 
   <footer>

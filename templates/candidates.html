@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Candidate List{% endblock %}
+{% block content %}
+<h2>Analyzed Candidates 📋</h2>
+<p>View and analyze previously evaluated candidates</p>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Candidate List</h5>
+    </div>
+    <div class="card-body">
+        {% if candidates %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>GitHub Username(s)</th>
+                            <th>Job Role</th>
+                            <th>Skills</th>
+                            <th>Date Added</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for candidate in candidates %}
+                            <tr>
+                                <td>{{ candidate.id }}</td>
+                                <td>{{ candidate.github_usernames }}</td>
+                                <td>{{ candidate.job_role }}</td>
+                                <td>{{ candidate.skills }}</td>
+                                <td>{{ candidate.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <a href="{{ url_for('main.visualization', candidate_id=candidate.id) }}" class="btn btn-primary btn-sm">View Analysis</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No candidates have been analyzed yet. <a href="{{ url_for('main.single_candidate') }}">Analyze a candidate</a> to get started.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-4">
+    <a href="{{ url_for('main.single_candidate') }}" class="btn btn-primary">Analyze Single Candidate</a>
+    <a href="{{ url_for('main.multi_candidate') }}" class="btn btn-success">Analyze Multiple Candidates</a>
+</div>
+{% endblock %}

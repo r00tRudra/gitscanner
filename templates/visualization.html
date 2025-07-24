@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Visualization Dashboard{% endblock %}
+{% block content %}
+<h2>Candidate Analysis Visualization 📊</h2>
+<p>Interactive visualization of candidate analysis results</p>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Candidate Overview</h5>
+            </div>
+            <div class="card-body">
+                <div id="candidateInfo" class="mb-4"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Skills Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="skillsChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Performance Metrics</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Detailed Analysis</h5>
+            </div>
+            <div class="card-body">
+                <div id="analysisContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Load Chart.js for visualizations -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Load visualization data -->
+<script>
+    // Data passed from Flask
+    const candidateData = {{ candidate_data | tojson | safe }};
+    const analysisResults = {{ analysis_results | tojson | safe }};
+    
+    // Populate candidate info
+    document.getElementById('candidateInfo').innerHTML = `
+        <h4>${candidateData.name || 'Candidate'}</h4>
+        <p><strong>GitHub:</strong> ${candidateData.github}</p>
+        <p><strong>Job Role:</strong> ${candidateData.job_role}</p>
+        <p><strong>Skills:</strong> ${candidateData.skills.join(', ')}</p>
+    `;
+    
+    // Populate analysis content
+    document.getElementById('analysisContent').innerHTML = analysisResults.summary;
+    
+    // Create Skills Chart
+    const skillsCtx = document.getElementById('skillsChart').getContext('2d');
+    new Chart(skillsCtx, {
+        type: 'pie',
+        data: {
+            labels: analysisResults.skills_data.map(item => item.name),
+            datasets: [{
+                data: analysisResults.skills_data.map(item => item.score),
+                backgroundColor: [
+                    '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                    '#5a5c69', '#858796', '#f8f9fc', '#d1d3e2', '#b7b9cc'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
+        }
+    });
+    
+    // Create Performance Chart
+    const perfCtx = document.getElementById('performanceChart').getContext('2d');
+    new Chart(perfCtx, {
+        type: 'radar',
+        data: {
+            labels: analysisResults.performance_metrics.map(item => item.category),
+            datasets: [{
+                label: 'Performance',
+                data: analysisResults.performance_metrics.map(item => item.score),
+                backgroundColor: 'rgba(78, 115, 223, 0.2)',
+                borderColor: 'rgba(78, 115, 223, 1)',
+                pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(78, 115, 223, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                r: {
+                    min: 0,
+                    max: 10,
+                    ticks: {
+                        stepSize: 2
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

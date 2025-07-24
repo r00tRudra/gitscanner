@@ -35,7 +35,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="A:\Open_Source\gitscanner\venv"
+VIRTUAL_ENV="C:\Abhiraj\OpenSource\gitscanner\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
