@@ -1,27 +1,907 @@
 {% extends "base.html" %}
+
 {% block title %}Multi-Candidate Analyzer{% endblock %}
+
 {% block content %}
-<h2>Multi-Candidate Analyzer 🕵️‍♂️</h2>
-<p>Enter multiple GitHub usernames (one per line) and a target job role.</p>
-<form method="POST" action="{{ url_for('main.multi_candidate') }}" enctype="multipart/form-data">
-    <div class="form-group">
-        <label for="github_usernames">GitHub Usernames (one per line)</label>
-        <textarea class="form-control" name="github_usernames" rows="5" placeholder="username1\nusername2\n..."></textarea>
+<div class="multi-candidate-page">
+    <!-- Page Header -->
+    <div class="page-header text-center mb-5">
+        <div class="header-icon">
+            <i class="fas fa-users-cog"></i>
+        </div>
+        <h1 class="page-title">Multi-Candidate Analyzer</h1>
+        <p class="page-subtitle">Analyze multiple GitHub profiles simultaneously for efficient bulk candidate evaluation</p>
     </div>
-    <div class="form-group">
-        <label for="job_role">Target Job Role</label>
-        <input type="text" class="form-control" name="job_role" placeholder="e.g. Backend Engineer">
+
+    <!-- Analysis Form -->
+    <div class="analysis-form-container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="form-card">
+                    <form method="POST" action="{{ url_for('main.multi_candidate') }}" enctype="multipart/form-data" class="candidate-form">
+                        <div class="row g-4">
+                            <!-- Main Input Section -->
+                            <div class="col-lg-8">
+                                <div class="form-group">
+                                    <label for="github_usernames" class="form-label">
+                                        <i class="fab fa-github me-2"></i>GitHub Usernames
+                                        <span class="required">*</span>
+                                        <span class="candidate-counter">0 candidates</span>
+                                    </label>
+                                    <div class="textarea-wrapper">
+                                        <textarea class="form-control username-textarea" 
+                                                  name="github_usernames" 
+                                                  id="github_usernames"
+                                                  rows="8" 
+                                                  placeholder="Enter GitHub usernames (one per line)&#10;&#10;Example:&#10;john-doe&#10;jane-smith&#10;developer123&#10;awesome-coder"
+                                                  required></textarea>
+                                        <div class="textarea-overlay">
+                                            <div class="line-numbers" id="lineNumbers">
+                                                <span>1</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <small class="form-text">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Enter one GitHub username per line. Maximum 50 candidates per analysis.
+                                    </small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="job_role" class="form-label">
+                                        <i class="fas fa-briefcase me-2"></i>Target Job Role
+                                        <span class="required">*</span>
+                                    </label>
+                                    <div class="input-wrapper">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               name="job_role" 
+                                               id="job_role"
+                                               placeholder="e.g. Backend Engineer, Full Stack Developer, DevOps Engineer"
+                                               required>
+                                        <div class="input-icon">
+                                            <i class="fas fa-briefcase"></i>
+                                        </div>
+                                    </div>
+                                    <small class="form-text">All candidates will be evaluated against this role</small>
+                                </div>
+                            </div>
+
+                            <!-- Side Panel -->
+                            <div class="col-lg-4">
+                                <div class="side-panel">
+                                    <div class="form-group">
+                                        <label for="resume" class="form-label">
+                                            <i class="fas fa-file-pdf me-2"></i>Reference Resume
+                                            <span class="optional">Optional</span>
+                                        </label>
+                                        <div class="file-upload-wrapper">
+                                            <input type="file" 
+                                                   class="form-control file-input" 
+                                                   name="resume" 
+                                                   id="resume"
+                                                   accept=".pdf">
+                                            <label for="resume" class="file-upload-label">
+                                                <div class="file-upload-content">
+                                                    <i class="fas fa-cloud-upload-alt"></i>
+                                                    <span class="file-text">Upload reference resume</span>
+                                                    <span class="file-subtext">PDF format, max 10MB</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <small class="form-text">Upload a reference resume to compare candidates against ideal qualifications</small>
+                                    </div>
+
+                                    <!-- Analysis Preview -->
+                                    <div class="analysis-preview">
+                                        <h6 class="preview-title">
+                                            <i class="fas fa-chart-bar me-2"></i>Analysis Preview
+                                        </h6>
+                                        <div class="preview-stats">
+                                            <div class="stat-item">
+                                                <span class="stat-label">Candidates:</span>
+                                                <span class="stat-value" id="candidateCount">0</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span class="stat-label">Est. Time:</span>
+                                                <span class="stat-value" id="estimatedTime">0 min</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span class="stat-label">Analysis Type:</span>
+                                                <span class="stat-value">Bulk Comparison</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="form-actions text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-analyze">
+                                <i class="fas fa-users me-2"></i>
+                                <span class="btn-text">Analyze All Candidates</span>
+                                <div class="btn-loader">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </div>
+                            </button>
+                            <div class="analysis-note mt-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Analysis typically takes 30-60 seconds per candidate
+                                </small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="resume">Upload Resume (Optional)</label>
-        <input type="file" class="form-control" name="resume" accept=".pdf">
+
+    <!-- Quick Actions -->
+    <div class="quick-actions mt-4">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="actions-card">
+                    <h5 class="actions-title">Quick Actions</h5>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadSampleData()">
+                            <i class="fas fa-magic me-1"></i>Load Sample Data
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="clearForm()">
+                            <i class="fas fa-eraser me-1"></i>Clear All
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="validateUsernames()">
+                            <i class="fas fa-check me-1"></i>Validate Usernames
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <button type="submit" class="btn btn-primary">Analyze Candidates</button>
-</form>
-{% if results %}
-<div class="results">
-    <h3>Evaluation Results</h3>
-    {{ results | safe }}
+
+    <!-- Results Section -->
+    {% if results %}
+    <div class="results-section mt-5">
+        <div class="results-header text-center mb-4">
+            <div class="results-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h2 class="results-title">Multi-Candidate Analysis Results</h2>
+            <p class="results-subtitle">Comprehensive evaluation and ranking of all analyzed candidates</p>
+        </div>
+        
+        <div class="results-container">
+            <div class="results-toolbar mb-3">
+                <div class="toolbar-left">
+                    <button class="btn btn-sm btn-outline-primary" onclick="toggleView('grid')">
+                        <i class="fas fa-th me-1"></i>Grid View
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="toggleView('list')">
+                        <i class="fas fa-list me-1"></i>List View
+                    </button>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-sm btn-success" onclick="exportResults('excel')">
+                        <i class="fas fa-file-excel me-1"></i>Export Excel
+                    </button>
+                    <button class="btn btn-sm btn-primary" onclick="exportResults('pdf')">
+                        <i class="fas fa-file-pdf me-1"></i>Export PDF
+                    </button>
+                </div>
+            </div>
+            
+            <div class="results-content">
+                {{ results | safe }}
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="results-actions text-center mt-4">
+            <a href="{{ url_for('main.multi_candidate') }}" class="btn btn-primary me-3">
+                <i class="fas fa-plus me-2"></i>Analyze More Candidates
+            </a>
+            <a href="{{ url_for('main.candidates_list') }}" class="btn btn-outline-primary">
+                <i class="fas fa-list me-2"></i>View All Analyses
+            </a>
+        </div>
+    </div>
+    {% endif %}
 </div>
-{% endif %}
+
+<style>
+/* Multi-Candidate Page Styles */
+.multi-candidate-page {
+    padding: 120px 0 60px;
+    min-height: 100vh;
+}
+
+.page-header {
+    margin-bottom: 3rem;
+}
+
+.header-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--gradient-primary);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+    color: var(--bg-primary);
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Form Styles */
+.form-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.candidate-counter {
+    margin-left: auto;
+    background: var(--gradient-primary);
+    color: var(--bg-primary);
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.required {
+    color: #ff4444;
+    margin-left: 0.25rem;
+}
+
+.optional {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 400;
+    margin-left: 0.5rem;
+    padding: 0.1rem 0.4rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* Textarea Styles */
+.textarea-wrapper {
+    position: relative;
+}
+
+.username-textarea {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    padding: 1rem;
+    padding-left: 3rem;
+    font-size: 0.95rem;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 200px;
+    transition: all 0.3s ease;
+}
+
+.username-textarea:focus {
+    background: var(--bg-secondary);
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 0.2rem rgba(0, 255, 136, 0.25);
+    color: var(--text-primary);
+}
+
+.username-textarea::placeholder {
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+}
+
+.textarea-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    padding: 1rem 0;
+}
+
+.line-numbers {
+    display: flex;
+    flex-direction: column;
+    color: var(--text-muted);
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    padding-left: 0.5rem;
+    border-right: 1px solid var(--border-color);
+    margin-right: 0.5rem;
+    min-width: 2rem;
+    text-align: right;
+}
+
+.line-numbers span {
+    height: 1.5em;
+    display: block;
+}
+
+/* Input Styles */
+.input-wrapper {
+    position: relative;
+}
+
+.form-control {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    padding-right: 3rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background: var(--bg-secondary);
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 0.2rem rgba(0, 255, 136, 0.25);
+    color: var(--text-primary);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+.input-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.form-text {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+/* Side Panel */
+.side-panel {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    height: fit-content;
+}
+
+/* File Upload Styles */
+.file-upload-wrapper {
+    position: relative;
+}
+
+.file-input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.file-upload-label {
+    display: block;
+    background: var(--bg-primary);
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0;
+}
+
+.file-upload-label:hover {
+    border-color: var(--primary-green);
+    background: rgba(0, 255, 136, 0.05);
+}
+
+.file-upload-content i {
+    font-size: 1.5rem;
+    color: var(--primary-green);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.file-text {
+    display: block;
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.file-subtext {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+/* Analysis Preview */
+.analysis-preview {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.preview-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.preview-stats {
+    space-y: 0.5rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.stat-value {
+    color: var(--primary-green);
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* Submit Button */
+.btn-analyze {
+    background: var(--gradient-primary);
+    border: none;
+    color: var(--bg-primary);
+    padding: 0.875rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    min-width: 220px;
+}
+
+.btn-analyze:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 255, 136, 0.3);
+}
+
+.btn-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.btn-analyze.loading .btn-text {
+    opacity: 0;
+}
+
+.btn-analyze.loading .btn-loader {
+    opacity: 1;
+}
+
+.analysis-note {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* Features Section */
+.features-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+.features-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.feature-item {
+    text-align: center;
+}
+
+.feature-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 255, 136, 0.1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: var(--primary-green);
+    font-size: 1.2rem;
+}
+
+.feature-item h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.feature-item p {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+/* Quick Actions */
+.actions-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.actions-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+}
+
+/* Results Section */
+.results-section {
+    margin-top: 3rem;
+}
+
+.results-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--gradient-primary);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    color: var(--bg-primary);
+}
+
+.results-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.results-subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.results-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+.results-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.toolbar-left,
+.toolbar-right {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.results-content {
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.results-actions .btn {
+    padding: 0.625rem 1.5rem;
+    font-weight: 500;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.btn-outline-primary {
+    border: 1px solid var(--primary-green);
+    color: var(--primary-green);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-green);
+    color: var(--bg-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .side-panel {
+        margin-top: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .multi-candidate-page {
+        padding: 100px 0 40px;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .form-card {
+        padding: 1.5rem;
+    }
+    
+    .btn-analyze {
+        width: 100%;
+        margin-top: 1rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+    
+    .results-toolbar {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .toolbar-left,
+    .toolbar-right {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .header-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .page-title {
+        font-size: 1.75rem;
+    }
+    
+    .features-card {
+        padding: 1.5rem;
+    }
+    
+    .feature-item {
+        margin-bottom: 2rem;
+    }
+    
+    .username-textarea {
+        padding-left: 1rem;
+    }
+    
+    .textarea-overlay {
+        display: none;
+    }
+}
+</style>
+
+<script>
+// Multi-Candidate Form Enhancement JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.candidate-form');
+    const submitBtn = document.querySelector('.btn-analyze');
+    const usernamesTextarea = document.getElementById('github_usernames');
+    const candidateCounter = document.querySelector('.candidate-counter');
+    const candidateCountStat = document.getElementById('candidateCount');
+    const estimatedTimeStat = document.getElementById('estimatedTime');
+    const fileInput = document.getElementById('resume');
+    const fileLabel = document.querySelector('.file-upload-label');
+    const lineNumbers = document.getElementById('lineNumbers');
+    
+    // Update line numbers and candidate count
+    function updateTextareaInfo() {
+        const lines = usernamesTextarea.value.split('\n');
+        const validUsernames = lines.filter(line => line.trim().length > 0);
+        const count = validUsernames.length;
+        
+        // Update candidate counter
+        candidateCounter.textContent = `${count} candidate${count !== 1 ? 's' : ''}`;
+        candidateCountStat.textContent = count;
+        
+        // Update estimated time
+        const estimatedMinutes = Math.max(1, Math.ceil(count * 0.5));
+        estimatedTimeStat.textContent = `${estimatedMinutes} min`;
+        
+        // Update line numbers
+        lineNumbers.innerHTML = '';
+        // Only show line number 1 and hide the rest
+        const span = document.createElement('span');
+        span.textContent = '1';
+        lineNumbers.appendChild(span);
+        
+        // Validate max candidates
+        if (count > 50) {
+            usernamesTextarea.style.borderColor = '#ff4444';
+            candidateCounter.style.background = '#ff4444';
+        } else {
+            usernamesTextarea.style.borderColor = count > 0 ? 'var(--primary-green)' : 'var(--border-color)';
+            candidateCounter.style.background = 'var(--gradient-primary)';
+        }
+    }
+    
+    // File upload enhancement
+    if (fileInput && fileLabel) {
+        fileInput.addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name;
+            const fileText = fileLabel.querySelector('.file-text');
+            
+            if (fileName) {
+                fileText.textContent = fileName;
+                fileLabel.style.borderColor = 'var(--primary-green)';
+                fileLabel.style.background = 'rgba(0, 255, 136, 0.05)';
+            } else {
+                fileText.textContent = 'Upload reference resume';
+                fileLabel.style.borderColor = 'var(--border-color)';
+                fileLabel.style.background = 'var(--bg-primary)';
+            }
+        });
+    }
+    
+    // Textarea enhancements
+    if (usernamesTextarea) {
+        usernamesTextarea.addEventListener('input', updateTextareaInfo);
+        usernamesTextarea.addEventListener('scroll', function() {
+            lineNumbers.scrollTop = this.scrollTop;
+        });
+        
+        // Initial update
+        updateTextareaInfo();
+    }
+    
+    // Form submission enhancement
+    if (form && submitBtn) {
+        form.addEventListener('submit', function(e) {
+            const count = parseInt(candidateCountStat.textContent);
+            if (count === 0) {
+                e.preventDefault();
+                alert('Please enter at least one GitHub username.');
+                return;
+            }
+            if (count > 50) {
+                e.preventDefault();
+                alert('Maximum 50 candidates allowed per analysis.');
+                return;
+            }
+            
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+            
+            // Re-enable button after timeout as fallback
+            setTimeout(() => {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }, 60000);
+        });
+    }
+    
+    // Quick action functions
+    window.loadSampleData = function() {
+        const sampleUsernames = [
+            'torvalds',
+            'gaearon',
+            'sindresorhus',
+            'tj',
+            'addyosmani'
+        ].join('\n');
+        
+        usernamesTextarea.value = sampleUsernames;
+        document.getElementById('job_role').value = 'Full Stack Developer';
+        updateTextareaInfo();
+    };
+    
+    window.clearForm = function() {
+        usernamesTextarea.value = '';
+        document.getElementById('job_role').value = '';
+        if (fileInput) fileInput.value = '';
+        updateTextareaInfo();
+    };
+    
+    window.validateUsernames = function() {
+        const usernames = usernamesTextarea.value.split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+        
+        const invalidUsernames = usernames.filter(username => 
+            !/^[a-zA-Z0-9]([a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/.test(username)
+        );
+        
+        if (invalidUsernames.length > 0) {
+            alert(`Invalid usernames found:\n${invalidUsernames.join('\n')}\n\nGitHub usernames can only contain alphanumeric characters and hyphens.`);
+        } else {
+            alert(`All ${usernames.length} usernames are valid!`);
+        }
+    };
+    
+    // Results functions
+    window.toggleView = function(viewType) {
+        // Implementation for toggling between grid and list view
+        console.log('Toggle view:', viewType);
+    };
+    
+    window.exportResults = function(format) {
+        // Implementation for exporting results
+        console.log('Export results:', format);
+    };
+});
+</script>
 {% endblock %}

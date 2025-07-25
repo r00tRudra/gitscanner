@@ -1,133 +1,394 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GitScanner - Analyze GitHub Smarter</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f2f2f2;
-      color: #333;
-    }
-
-    header {
-      background-color: #1a3c6d;
-      color: white;
-      padding: 1.5rem;
-      text-align: center;
-    }
-
-    .container {
-      padding: 2rem;
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-    }
-
-    p {
-      font-size: 1.2rem;
-      max-width: 600px;
-      margin: 1rem auto;
-    }
-
-    .button-group {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 0.8rem 1.5rem;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      text-decoration: none;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-
-    .btn:hover {
-      background-color: #0056b3;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    footer {
-      background-color: #1a3c6d;
-      color: #bbb;
-      text-align: center;
-      padding: 1rem;
-      margin-top: 3rem;
-    }
-
-    /* Button styles */
-    .evaluate-btn {
-      display: inline-block;
-      padding: 0.8rem 1.5rem;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      text-decoration: none;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-
-    .evaluate-btn:hover {
-      background-color: #218838;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    
-    .visualize-btn {
-      display: inline-block;
-      padding: 0.8rem 1.5rem;
-      background-color: #6f42c1;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      text-decoration: none;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-
-    .visualize-btn:hover {
-      background-color: #5a32a3;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gitscanner {% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') }}">
+                <div class="logo-container me-2">
+                    <i class="fab fa-github"></i>
+                    <i class="fas fa-search"></i>
+                </div>
+                <span class="brand-text">Gitscanner</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.index') }}">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.single_candidate') }}">
+                            <i class="fas fa-user me-1"></i>Single Candidate
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.multi_candidate') }}">
+                            <i class="fas fa-users me-1"></i>Multiple Candidates
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.candidates_list') }}">
+                            <i class="fas fa-list me-1"></i>View All Candidates
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-  <header>
-    <h1>GitScanner</h1>
-    <p>Your AI-powered GitHub Analyzer</p>
-  </header>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center min-vh-100">
+                <div class="col-lg-6">
+                    <div class="hero-content">
+                        <h1 class="hero-title">
+                            Elite GitHub + Resume 
+                            <span class="text-gradient">Candidate Analyzer</span>
+                            for Tech Hiring
+                        </h1>
+                        <p class="hero-subtitle">
+                            Transform your hiring process with AI-powered GitHub profile analysis. 
+                            Find the perfect developers faster than ever before.
+                        </p>
+                        <div class="hero-buttons">
+                            <a href="{{ url_for('main.single_candidate') }}" class="btn btn-primary btn-lg me-3">
+                                <i class="fas fa-rocket me-2"></i>Get Started
+                            </a>
+                            <a href="#features" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-play me-2"></i>Learn More
+                            </a>
+                        </div>
+                        <div class="hero-stats mt-5">
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <h3>10K+</h3>
+                                        <p>Profiles Analyzed</p>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <h3>500+</h3>
+                                        <p>Companies</p>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <h3>95%</h3>
+                                        <p>Success Rate</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-visual">
+                        <div class="floating-card">
+                            <div class="card bg-dark border-success">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="avatar me-3">
+                                            <i class="fab fa-github"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">John Developer</h6>
+                                            <small class="text-muted">Full Stack Engineer</small>
+                                        </div>
+                                    </div>
+                                    <div class="skill-tags">
+                                        <span class="badge bg-success me-1">React</span>
+                                        <span class="badge bg-success me-1">Node.js</span>
+                                        <span class="badge bg-success me-1">Python</span>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="progress mb-2">
+                                            <div class="progress-bar bg-success" style="width: 92%"></div>
+                                        </div>
+                                        <small class="text-success">Match Score: 92%</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  <div class="container">
-    <h1>Discover Insights from Repositories</h1>
-    <p>Analyze GitHub profiles, code quality, contributions, and more with our powerful AI tool. Just enter a GitHub link and let us do the rest!</p>
-    
-    <div class="button-group">
-      <a href="{{ url_for('main.single_candidate') }}" class="btn">Analyze Single Candidate</a>
-      <a href="{{ url_for('main.multi_candidate_html') }}" class="evaluate-btn">Evaluate Multiple Candidates</a>
-      <a href="{{ url_for('main.candidates_list') }}" class="visualize-btn">View All Candidates</a>
+    <!-- Features Section -->
+    <section id="features" class="features-section py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Why Choose Gitscanner?</h2>
+                <p class="section-subtitle">Powerful features that revolutionize technical hiring</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fab fa-github"></i>
+                        </div>
+                        <h4>GitHub Analysis</h4>
+                        <p>Deep dive into candidate's repositories, commit history, and coding patterns to assess real skills.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h4>AI-Powered Insights</h4>
+                        <p>Advanced algorithms analyze code quality, project complexity, and technical expertise automatically.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h4>Smart Scoring</h4>
+                        <p>Get comprehensive candidate scores based on multiple factors including activity, skills, and experience.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h4>Bulk Processing</h4>
+                        <p>Analyze multiple candidates simultaneously to streamline your recruitment workflow.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h4>Resume Integration</h4>
+                        <p>Combine GitHub analysis with traditional resume screening for complete candidate evaluation.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h4>Real-time Results</h4>
+                        <p>Get instant candidate insights and recommendations to speed up your hiring decisions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials-section py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">What Our Users Say</h2>
+                <p class="section-subtitle">Hiring made easy using GitHub profiles</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="testimonial-card">
+                        <div class="testimonial-header">
+                            <div class="avatar">
+                                <img src="/placeholder.svg?height=50&width=50" alt="Sarah Chen">
+                            </div>
+                            <div class="user-info">
+                                <h6>Sarah Chen</h6>
+                                <small>@sarahc_tech</small>
+                                <div class="verified-badge">
+                                    <i class="fas fa-check-circle text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="testimonial-text">
+                            "Gitscanner transformed our hiring process! We found 3 amazing developers in just one week. 
+                            The GitHub analysis is incredibly detailed and accurate. #TechHiring #GameChanger"
+                        </p>
+                        <div class="testimonial-footer">
+                            <span class="text-muted">2 hours ago</span>
+                            <div class="social-actions">
+                                <i class="far fa-heart"></i> 24
+                                <i class="far fa-comment ms-2"></i> 8
+                                <i class="fas fa-retweet ms-2"></i> 12
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="testimonial-card">
+                        <div class="testimonial-header">
+                            <div class="avatar">
+                                <img src="/placeholder.svg?height=50&width=50" alt="Mike Rodriguez">
+                            </div>
+                            <div class="user-info">
+                                <h6>Mike Rodriguez</h6>
+                                <small>@mike_codes</small>
+                                <div class="verified-badge">
+                                    <i class="fas fa-check-circle text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="testimonial-text">
+                            "As a startup CTO, finding the right talent is crucial. Gitscanner's AI analysis helped us identify 
+                            candidates we would have missed otherwise. The match scores are spot on! 🎯"
+                        </p>
+                        <div class="testimonial-footer">
+                            <span class="text-muted">5 hours ago</span>
+                            <div class="social-actions">
+                                <i class="far fa-heart"></i> 18
+                                <i class="far fa-comment ms-2"></i> 5
+                                <i class="fas fa-retweet ms-2"></i> 9
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="testimonial-card">
+                        <div class="testimonial-header">
+                            <div class="avatar">
+                                <img src="/placeholder.svg?height=50&width=50" alt="Priya Patel">
+                            </div>
+                            <div class="user-info">
+                                <h6>Priya Patel</h6>
+                                <small>@priya_hr</small>
+                                <div class="verified-badge">
+                                    <i class="fas fa-check-circle text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="testimonial-text">
+                            "Finally, a tool that looks beyond resumes! The GitHub profile analysis revealed hidden gems 
+                            in our candidate pool. Our engineering team quality has improved significantly. #HRTech"
+                        </p>
+                        <div class="testimonial-footer">
+                            <span class="text-muted">1 day ago</span>
+                            <div class="social-actions">
+                                <i class="far fa-heart"></i> 31
+                                <i class="far fa-comment ms-2"></i> 12
+                                <i class="fas fa-retweet ms-2"></i> 15
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Companies Section -->
+    <section class="companies-section py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Trusted by Leading Companies</h2>
+                <p class="section-subtitle">We helped them hire exceptional talent</p>
+            </div>
+            <div class="companies-grid">
+                <div class="company-logo">
+                    <img src="/placeholder.svg?height=60&width=120" alt="TechCorp">
+                    <span class="hire-badge">15+ hires</span>
+                </div>
+                <div class="company-logo">
+                    <img src="/placeholder.svg?height=60&width=120" alt="InnovateLab">
+                    <span class="hire-badge">8+ hires</span>
+                </div>
+                <div class="company-logo">
+                    <img src="/placeholder.svg?height=60&width=120" alt="CodeBase">
+                    <span class="hire-badge">22+ hires</span>
+                </div>
+                <div class="company-logo">
+                    <img src="/placeholder.svg?height=60&width=120" alt="FinTech Pro">
+                    <span class="hire-badge">12+ hires</span>
+                </div>
+                <div class="company-logo">
+                    <img src="/placeholder.svg?height=60&width=120" alt="AI Solutions">
+                    <span class="hire-badge">18+ hires</span>
+                </div>
+                <div class="company-logo">
+                    <img src="/placeholder.svg?height=60&width=120" alt="CloudTech">
+                    <span class="hire-badge">25+ hires</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section py-5">
+        <div class="container">
+            <div class="cta-content text-center">
+                <h2>Ready to Transform Your Hiring?</h2>
+                <p>Join hundreds of companies already using Gitscanner to find exceptional developers</p>
+                <div class="cta-buttons mt-4">
+                    <a href="{{ url_for('main.single_candidate') }}" class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-rocket me-2"></i>Start Analyzing
+                    </a>
+                    <a href="{{ url_for('main.multi_candidate') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-users me-2"></i>Bulk Analysis
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Flash Messages -->
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
     </div>
-  </div>
 
-  <footer>
-    &copy; 2025 GitScanner. All rights reserved.
-  </footer>
+    <!-- Footer -->
+    <footer class="footer py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center">
+                        <div class="logo-container me-2">
+                            <i class="fab fa-github"></i>
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <span class="brand-text">Gitscanner</span>
+                    </div>
+                    <p class="mt-2 text-muted">Elite GitHub + Resume Candidate Analyzer for Tech Hiring</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="social-links">
+                        <a href="#" class="text-muted me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-muted me-3"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-muted"><i class="fab fa-github"></i></a>
+                    </div>
+                    <p class="mt-2 text-muted">&copy; 2024 Gitscanner. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

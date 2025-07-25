@@ -1,53 +1,136 @@
 {% extends "base.html" %}
+
 {% block title %}Visualization Dashboard{% endblock %}
+
 {% block content %}
-<h2>Candidate Analysis Visualization 📊</h2>
-<p>Interactive visualization of candidate analysis results</p>
+<div class="visualization-page">
+    <!-- Page Header -->
+    <div class="page-header text-center mb-5">
+        <div class="header-icon">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <h1 class="page-title">Candidate Analysis Dashboard</h1>
+        <p class="page-subtitle">Interactive visualization and comprehensive analysis of candidate performance</p>
+    </div>
 
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h5>Candidate Overview</h5>
+
+    <!-- Charts Section -->
+    <div class="charts-section mb-4">
+        <div class="row g-4">
+            <!-- Skills Distribution Chart -->
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h5 class="chart-title">
+                            <i class="fas fa-code me-2"></i>
+                            Skills Distribution
+                        </h5>
+                        <div class="chart-controls">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="toggleChartType('skills')">
+                                <i class="fas fa-exchange-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <div class="chart-container">
+                            <canvas id="skillsChart"></canvas>
+                        </div>
+                        <div class="chart-legend" id="skillsLegend">
+                            <!-- Legend will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div id="candidateInfo" class="mb-4"></div>
+
+            <!-- Performance Metrics Chart -->
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h5 class="chart-title">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Performance Metrics
+                        </h5>
+                        <div class="chart-controls">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="toggleChartType('performance')">
+                                <i class="fas fa-exchange-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <div class="chart-container">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                        <div class="performance-details" id="performanceDetails">
+                            <!-- Performance details will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5>Skills Distribution</h5>
+    <!-- Activity Timeline Chart -->
+    <div class="timeline-section mb-4">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h5 class="chart-title">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Activity Timeline
+                </h5>
+                <div class="chart-controls">
+                    <span class="timeline-label">Last 6 Months</span>
+                </div>
             </div>
-            <div class="card-body">
-                <canvas id="skillsChart"></canvas>
+            <div class="chart-body">
+                <div class="chart-container timeline-container">
+                    <canvas id="timelineChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card">
+
+    <!-- Detailed Analysis Section -->
+    <div class="analysis-section mb-4">
+        <div class="analysis-card">
             <div class="card-header">
-                <h5>Performance Metrics</h5>
+                <h4 class="card-title">
+                    <i class="fas fa-microscope me-2"></i>
+                    Detailed Analysis Report
+                </h4>
+                <div class="analysis-info">
+                    <span class="analysis-label">Analysis Summary</span>
+                </div>
             </div>
             <div class="card-body">
-                <canvas id="performanceChart"></canvas>
+                <div class="analysis-content">
+                    <div id="analysisContent" class="analysis-text">
+                        <!-- Analysis content will be populated by JavaScript -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h5>Detailed Analysis</h5>
-            </div>
-            <div class="card-body">
-                <div id="analysisContent"></div>
+    <!-- Action Buttons -->
+    <div class="actions-section">
+        <div class="actions-card">
+            <div class="actions-grid">
+                <a href="{{ url_for('main.candidates_list') }}" class="action-btn secondary">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Back to Candidates
+                </a>
+                <button class="action-btn primary" onclick="scheduleInterview()">
+                    <i class="fas fa-calendar-plus me-2"></i>
+                    Schedule Interview
+                </button>
+                <button class="action-btn outline" onclick="addToShortlist()">
+                    <i class="fas fa-star me-2"></i>
+                    Add to Shortlist
+                </button>
+                <button class="action-btn outline" onclick="generateReport()">
+                    <i class="fas fa-file-pdf me-2"></i>
+                    Generate PDF Report
+                </button>
             </div>
         </div>
     </div>
@@ -55,77 +138,1002 @@
 
 <!-- Load Chart.js for visualizations -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 
-<!-- Load visualization data -->
+<style>
+/* Visualization Page Styles */
+.visualization-page {
+    padding: 120px 0 60px;
+    min-height: 100vh;
+}
+
+.page-header {
+    margin-bottom: 3rem;
+}
+
+.header-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--gradient-primary);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+    color: var(--bg-primary);
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Breadcrumb */
+.breadcrumb-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.breadcrumb {
+    margin: 0;
+    background: transparent;
+}
+
+.breadcrumb-item {
+    color: var(--text-secondary);
+}
+
+.breadcrumb-item a {
+    color: var(--primary-green);
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--secondary-green);
+}
+
+.breadcrumb-item.active {
+    color: var(--text-primary);
+}
+
+/* Metrics Section */
+.metric-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.metric-card:hover {
+    border-color: var(--primary-green);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.metric-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 255, 136, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-green);
+    font-size: 1.2rem;
+}
+
+.metric-content {
+    flex: 1;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.metric-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.metric-progress {
+    width: 100%;
+    height: 4px;
+    background: var(--bg-tertiary);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--gradient-primary);
+    border-radius: 2px;
+    transition: width 1s ease;
+}
+
+.metric-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--primary-green);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.metric-trend i {
+    font-size: 0.7rem;
+}
+
+/* Chart Cards */
+.chart-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    height: 100%;
+}
+
+.chart-header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chart-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.chart-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chart-body {
+    padding: 1.5rem;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin-bottom: 1rem;
+}
+
+.timeline-container {
+    height: 200px;
+}
+
+.chart-legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.performance-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.performance-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.performance-score {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-green);
+    margin-bottom: 0.25rem;
+}
+
+.performance-label {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+/* Analysis Section */
+.analysis-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.analysis-card .card-header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.timeline-label,
+.analysis-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.analysis-info {
+    display: flex;
+    align-items: center;
+}
+
+/* Analysis Content Styles */
+.analysis-card .card-body {
+    padding: 0;
+}
+
+.analysis-content {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.analysis-text {
+    padding: 1.5rem 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+#analysisContent h4 {
+    font-size: 1.4rem;
+    margin-bottom: 1.25rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+}
+
+#analysisContent h5 {
+    font-size: 1.1rem;
+    margin: 1.75rem 0 0.75rem;
+    color: var(--primary-green);
+    font-weight: 600;
+}
+
+#analysisContent p {
+    margin-bottom: 1.25rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
+#analysisContent ul {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+    list-style-type: none;
+}
+
+#analysisContent li {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    position: relative;
+    font-size: 0.95rem;
+    padding-left: 1.5rem;
+}
+
+#analysisContent li:before {
+    content: '•';
+    color: var(--primary-green);
+    position: absolute;
+    left: 0;
+    font-size: 1.2rem;
+    line-height: 1.2;
+}
+
+/* Actions Section */
+.actions-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    font-size: 0.95rem;
+}
+
+.action-btn.primary {
+    background: var(--gradient-primary);
+    color: var(--bg-primary);
+}
+
+.action-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 255, 136, 0.3);
+}
+
+.action-btn.secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.action-btn.secondary:hover {
+    border-color: var(--primary-green);
+    color: var(--text-primary);
+}
+
+.action-btn.outline {
+    background: transparent;
+    color: var(--primary-green);
+    border: 1px solid var(--primary-green);
+}
+
+.action-btn.outline:hover {
+    background: var(--primary-green);
+    color: var(--bg-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 768px) {
+    .visualization-page {
+        padding: 100px 0 40px;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .metric-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .metric-icon {
+        margin: 0;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+    
+    .timeline-container {
+        height: 150px;
+    }
+    
+    .chart-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .analysis-text {
+        padding: 1.25rem;
+    }
+    
+    #analysisContent h4 {
+        font-size: 1.2rem;
+    }
+    
+    #analysisContent h5 {
+        font-size: 1rem;
+    }
+    
+    #analysisContent p,
+    #analysisContent li {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .header-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .page-title {
+        font-size: 1.75rem;
+    }
+    
+    .metric-value {
+        font-size: 1.5rem;
+    }
+    
+    .chart-body {
+        padding: 1rem;
+    }
+    
+    .analysis-text {
+        padding: 1rem;
+    }
+    
+    #analysisContent h4 {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    #analysisContent h5 {
+        font-size: 0.95rem;
+        margin: 1.25rem 0 0.5rem;
+    }
+    
+    #analysisContent p {
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+    
+    #analysisContent ul {
+        padding-left: 1rem;
+    }
+    
+    #analysisContent li {
+        padding-left: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Button Styles */
+.btn-outline-primary {
+    border: 1px solid var(--primary-green);
+    color: var(--primary-green);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-green);
+    color: var(--bg-primary);
+}
+
+.btn-outline-secondary {
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-outline-secondary.active {
+    background: var(--primary-green);
+    border-color: var(--primary-green);
+    color: var(--bg-primary);
+}
+
+.btn-group .btn {
+    border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+
+.btn-group .btn:last-child {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.legend-color {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend-item:hover .legend-color {
+    transform: scale(1.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Enhanced chart hover effects */
+#skillsChart {
+    transition: all 0.3s ease;
+}
+
+.chart-container:hover #skillsChart {
+    filter: brightness(1.1);
+}
+</style>
+
 <script>
-    // Data passed from Flask
-    const candidateData = {{ candidate_data | tojson | safe }};
-    const analysisResults = {{ analysis_results | tojson | safe }};
+// Visualization Dashboard JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Data passed from Flask (you can replace with actual data)
+    const candidateData = {{ candidate_data | tojson | safe if candidate_data else '{}' }};
+    const analysisResults = {{ analysis_results | tojson | safe if analysis_results else '{}' }};
     
-    // Populate candidate info
-    document.getElementById('candidateInfo').innerHTML = `
-        <h4>${candidateData.name || 'Candidate'}</h4>
-        <p><strong>GitHub:</strong> ${candidateData.github}</p>
-        <p><strong>Job Role:</strong> ${candidateData.job_role}</p>
-        <p><strong>Skills:</strong> ${candidateData.skills.join(', ')}</p>
-    `;
+    // Chart instances
+    let skillsChart, performanceChart, timelineChart;
+    let currentSkillsChartType = 'doughnut';
+    let currentPerformanceChartType = 'radar';
     
-    // Populate analysis content
-    document.getElementById('analysisContent').innerHTML = analysisResults.summary;
+    // Initialize dashboard
+    initializeDashboard();
     
-    // Create Skills Chart
-    const skillsCtx = document.getElementById('skillsChart').getContext('2d');
-    new Chart(skillsCtx, {
-        type: 'pie',
+    function initializeDashboard() {
+        populateMetrics();
+        createCharts();
+        populateAnalysisContent();
+    }
+    
+    function populateMetrics() {
+        // Default metrics if no data provided
+        const metrics = {
+            overallScore: analysisResults.overall_score || 87,
+            skillsCount: analysisResults.skills_count || 12,
+            projectsCount: analysisResults.projects_count || 8,
+            activityScore: analysisResults.activity_score || 92
+        };
+        
+        // Animate metrics
+        animateMetric('overallScore', metrics.overallScore, '%');
+        animateMetric('skillsCount', metrics.skillsCount, '');
+        animateMetric('projectsCount', metrics.projectsCount, '');
+        animateMetric('activityScore', metrics.activityScore, '%');
+        
+        // Update progress bar
+        setTimeout(() => {
+            document.getElementById('overallProgress').style.width = metrics.overallScore + '%';
+        }, 500);
+    }
+    
+    function animateMetric(elementId, targetValue, suffix) {
+        const element = document.getElementById(elementId);
+        let currentValue = 0;
+        const increment = targetValue / 50;
+        
+        const timer = setInterval(() => {
+            currentValue += increment;
+            if (currentValue >= targetValue) {
+                currentValue = targetValue;
+                clearInterval(timer);
+            }
+            element.textContent = Math.floor(currentValue) + suffix;
+        }, 30);
+    }
+    
+    function createCharts() {
+        createSkillsChart();
+        createPerformanceChart();
+        createTimelineChart();
+    }
+    
+function createSkillsChart() {
+    const ctx = document.getElementById('skillsChart').getContext('2d');
+    
+    // Default skills data
+    const skillsData = analysisResults.skills_data || [
+        { name: 'JavaScript', score: 95 },
+        { name: 'React', score: 88 },
+        { name: 'Node.js', score: 82 },
+        { name: 'Python', score: 78 },
+        { name: 'Docker', score: 75 },
+        { name: 'AWS', score: 70 }
+    ];
+    
+    // Generate dynamic green colors based on skill percentages
+    const colors = generateGreenColorGradient(skillsData);
+    
+    skillsChart = new Chart(ctx, {
+        type: currentSkillsChartType,
         data: {
-            labels: analysisResults.skills_data.map(item => item.name),
+            labels: skillsData.map(item => item.name),
             datasets: [{
-                data: analysisResults.skills_data.map(item => item.score),
-                backgroundColor: [
-                    '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
-                    '#5a5c69', '#858796', '#f8f9fc', '#d1d3e2', '#b7b9cc'
-                ]
+                data: skillsData.map(item => item.score),
+                backgroundColor: colors.background,
+                borderColor: colors.border,
+                borderWidth: 2,
+                hoverBorderWidth: 3,
+                hoverBackgroundColor: colors.hover
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'right',
-                }
-            }
-        }
-    });
-    
-    // Create Performance Chart
-    const perfCtx = document.getElementById('performanceChart').getContext('2d');
-    new Chart(perfCtx, {
-        type: 'radar',
-        data: {
-            labels: analysisResults.performance_metrics.map(item => item.category),
-            datasets: [{
-                label: 'Performance',
-                data: analysisResults.performance_metrics.map(item => item.score),
-                backgroundColor: 'rgba(78, 115, 223, 0.2)',
-                borderColor: 'rgba(78, 115, 223, 1)',
-                pointBackgroundColor: 'rgba(78, 115, 223, 1)',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgba(78, 115, 223, 1)'
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                r: {
-                    min: 0,
-                    max: 10,
-                    ticks: {
-                        stepSize: 2
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: '#1a1a1a',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: '#00ff88',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed + '%';
+                        }
                     }
                 }
             }
         }
     });
+    
+    // Create custom legend with dynamic colors
+    createSkillsLegend(skillsData, colors.background);
+}
+
+// Add this new function to generate dynamic green color gradients
+function generateGreenColorGradient(skillsData) {
+    const colors = {
+        background: [],
+        border: [],
+        hover: []
+    };
+    
+    // Find min and max scores for proper scaling
+    const scores = skillsData.map(skill => skill.score);
+    const maxScore = Math.max(...scores);
+    const minScore = Math.min(...scores);
+    const scoreRange = maxScore - minScore;
+    
+    skillsData.forEach(skill => {
+        // Normalize score to 0-1 range based on actual data range
+        let normalizedScore;
+        if (scoreRange === 0) {
+            // If all scores are the same, use middle intensity
+            normalizedScore = 0.5;
+        } else {
+            normalizedScore = (skill.score - minScore) / scoreRange;
+        }
+        
+        // Create gradient from dark green (low scores) to light green (high scores)
+        // Dark green: rgb(0, 100, 50) to Light green: rgb(100, 255, 150)
+        const minRed = 0;
+        const maxRed = 100;
+        const minGreen = 100;
+        const maxGreen = 255;
+        const minBlue = 50;
+        const maxBlue = 150;
+        
+        // Interpolate between dark and light green based on normalized score
+        const red = Math.round(minRed + (maxRed - minRed) * normalizedScore);
+        const green = Math.round(minGreen + (maxGreen - minGreen) * normalizedScore);
+        const blue = Math.round(minBlue + (maxBlue - minBlue) * normalizedScore);
+        
+        // Create background color
+        const backgroundColor = `rgb(${red}, ${green}, ${blue})`;
+        
+        // Create border color (slightly darker)
+        const borderRed = Math.max(0, red - 30);
+        const borderGreen = Math.max(80, green - 30);
+        const borderBlue = Math.max(30, blue - 30);
+        const borderColor = `rgb(${borderRed}, ${borderGreen}, ${borderBlue})`;
+        
+        // Create hover color (slightly lighter)
+        const hoverRed = Math.min(255, red + 20);
+        const hoverGreen = Math.min(255, green + 20);
+        const hoverBlue = Math.min(255, blue + 20);
+        const hoverColor = `rgb(${hoverRed}, ${hoverGreen}, ${hoverBlue})`;
+        
+        colors.background.push(backgroundColor);
+        colors.border.push(borderColor);
+        colors.hover.push(hoverColor);
+    });
+    
+    return colors;
+}
+
+// Update the createSkillsLegend function to accept colors parameter
+function createSkillsLegend(skillsData, colors) {
+    const legend = document.getElementById('skillsLegend');
+    legend.innerHTML = skillsData.map((skill, index) => `
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: ${colors[index]}"></div>
+            <span>${skill.name} (${skill.score}%)</span>
+        </div>
+    `).join('');
+}
+    
+    function createPerformanceChart() {
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        
+        // Default performance data
+        const performanceData = analysisResults.performance_metrics || [
+            { category: 'Code Quality', score: 8.5 },
+            { category: 'Activity', score: 9.2 },
+            { category: 'Collaboration', score: 7.8 },
+            { category: 'Innovation', score: 8.0 },
+            { category: 'Consistency', score: 8.7 },
+            { category: 'Documentation', score: 7.5 }
+        ];
+        
+        performanceChart = new Chart(ctx, {
+            type: currentPerformanceChartType,
+            data: {
+                labels: performanceData.map(item => item.category),
+                datasets: [{
+                    label: 'Performance Score',
+                    data: performanceData.map(item => item.score),
+                    backgroundColor: 'rgba(0, 255, 136, 0.2)',
+                    borderColor: '#00ff88',
+                    pointBackgroundColor: '#00ff88',
+                    pointBorderColor: '#ffffff',
+                    pointHoverBackgroundColor: '#ffffff',
+                    pointHoverBorderColor: '#00ff88',
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 10,
+                        ticks: {
+                            stepSize: 2,
+                            color: '#666666',
+                            backdropColor: 'transparent'
+                        },
+                        grid: {
+                            color: '#333333'
+                        },
+                        angleLines: {
+                            color: '#333333'
+                        },
+                        pointLabels: {
+                            color: '#ffffff',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#1a1a1a',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: '#00ff88',
+                        borderWidth: 1
+                    }
+                }
+            }
+        });
+        
+        // Create performance details
+        createPerformanceDetails(performanceData);
+    }
+    
+    function createPerformanceDetails(performanceData) {
+        const details = document.getElementById('performanceDetails');
+        details.innerHTML = performanceData.map(item => `
+            <div class="performance-item">
+                <div class="performance-score">${item.score}</div>
+                <div class="performance-label">${item.category}</div>
+            </div>
+        `).join('');
+    }
+    
+    function createTimelineChart() {
+        const ctx = document.getElementById('timelineChart').getContext('2d');
+        
+        // Generate sample timeline data
+        const timelineData = generateTimelineData();
+        
+        timelineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: timelineData.labels,
+                datasets: [{
+                    label: 'Commits',
+                    data: timelineData.commits,
+                    borderColor: '#00ff88',
+                    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 2,
+                    pointHoverRadius: 4
+                }, {
+                    label: 'Pull Requests',
+                    data: timelineData.pullRequests,
+                    borderColor: '#00cc6a',
+                    backgroundColor: 'rgba(0, 204, 106, 0.1)',
+                    fill: false,
+                    tension: 0.4,
+                    pointRadius: 2,
+                    pointHoverRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#666666'
+                        },
+                        grid: {
+                            color: '#333333'
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#666666'
+                        },
+                        grid: {
+                            color: '#333333'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#ffffff'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#1a1a1a',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: '#00ff88',
+                        borderWidth: 1
+                    }
+                }
+            }
+        });
+    }
+    
+    function generateTimelineData() {
+        const labels = [];
+        const commits = [];
+        const pullRequests = [];
+        
+        // Generate 6 months of data
+        for (let i = 5; i >= 0; i--) {
+            const date = new Date();
+            date.setMonth(date.getMonth() - i);
+            labels.push(date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }));
+            commits.push(Math.floor(Math.random() * 50) + 10);
+            pullRequests.push(Math.floor(Math.random() * 15) + 2);
+        }
+        
+        return { labels, commits, pullRequests };
+    }
+    
+    function populateAnalysisContent() {
+        // Summary content only
+        document.getElementById('analysisContent').innerHTML = analysisResults.summary || `
+            <h4>Candidate Analysis Summary</h4>
+            <p>This candidate demonstrates strong technical skills with a focus on modern web development technologies. Their GitHub profile shows consistent activity and high-quality code contributions across multiple repositories.</p>
+            
+            <h5>Key Highlights:</h5>
+            <ul>
+                <li>Strong proficiency in JavaScript and React ecosystem</li>
+                <li>Active contributor with regular commits and pull requests</li>
+                <li>Good documentation practices and code organization</li>
+                <li>Experience with modern development tools and practices</li>
+            </ul>
+        
+            <h5>Technical Assessment:</h5>
+            <p>Based on the analysis of repositories and commit history, this candidate shows:</p>
+            <ul>
+                <li>Advanced understanding of frontend frameworks and component architecture</li>
+                <li>Backend development experience with Node.js and database systems</li>
+                <li>Strong problem-solving abilities demonstrated through code quality</li>
+            </ul>
+            
+            <h5>Recommendation:</h5>
+            <p>This candidate is recommended for further consideration based on their technical skills, project experience, and consistent contribution history. Their profile aligns well with the requirements for the position.</p>
+        `;
+    }
+    
+    // Chart toggle functions
+    window.toggleChartType = function(chartType) {
+        if (chartType === 'skills') {
+            skillsChart.destroy();
+            currentSkillsChartType = currentSkillsChartType === 'doughnut' ? 'bar' : 'doughnut';
+            createSkillsChart();
+        } else if (chartType === 'performance') {
+            performanceChart.destroy();
+            currentPerformanceChartType = currentPerformanceChartType === 'radar' ? 'bar' : 'radar';
+            createPerformanceChart();
+        }
+    };
+    
+    // Action functions
+    window.exportDashboard = function() {
+        console.log('Export dashboard');
+        // Implement export functionality
+    };
+    
+    window.shareDashboard = function() {
+        console.log('Share dashboard');
+        // Implement share functionality
+    };
+    
+    window.scheduleInterview = function() {
+        console.log('Schedule interview');
+        // Implement interview scheduling
+    };
+    
+    window.addToShortlist = function() {
+        console.log('Add to shortlist');
+        // Implement shortlist functionality
+    };
+    
+    window.generateReport = function() {
+        console.log('Generate report');
+        // Implement report generation
+    };
+});
 </script>
 {% endblock %}

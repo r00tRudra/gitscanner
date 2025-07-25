@@ -1,53 +1,924 @@
 {% extends "base.html" %}
-{% block title %}Candidate List{% endblock %}
-{% block content %}
-<h2>Analyzed Candidates 📋</h2>
-<p>View and analyze previously evaluated candidates</p>
 
-<div class="card">
-    <div class="card-header">
-        <h5>Candidate List</h5>
+{% block title %}Candidate List{% endblock %}
+
+{% block content %}
+<div class="candidates-page">
+    <!-- Page Header -->
+    <div class="page-header text-center mb-5">
+        <div class="header-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <h1 class="page-title">Analyzed Candidates</h1>
+        <p class="page-subtitle">View, manage, and analyze previously evaluated candidates</p>
     </div>
-    <div class="card-body">
+
+    <!-- Controls Section -->
+    <div class="controls-section mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-4 col-md-6">
+                <div class="search-wrapper">
+                    <input type="text"
+                            class="form-control search-input"
+                            id="searchInput"
+                           placeholder="Search candidates, roles, or skills...">
+                    <div class="search-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <select class="form-select filter-select" id="roleFilter">
+                    <option value="">All Roles</option>
+                    <option value="frontend">Frontend Developer</option>
+                    <option value="backend">Backend Developer</option>
+                    <option value="fullstack">Full Stack Developer</option>
+                    <option value="devops">DevOps Engineer</option>
+                    <option value="ml">ML Engineer</option>
+                    <option value="mobile">Mobile Developer</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <select class="form-select filter-select" id="dateFilter">
+                    <option value="">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="quarter">Last 3 Months</option>
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="action-buttons">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="deleteSelected()" disabled id="deleteBtn">
+                        <i class="fas fa-trash me-1"></i>Delete Selected
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" onclick="exportSelected()">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-section mb-4">
+        <div class="row g-3">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number" id="totalCandidates">{{ candidates|length if candidates else 0 }}</h3>
+                        <p class="stat-label">Total Candidates</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number" id="todayAnalyses">0</h3>
+                        <p class="stat-label">Analyzed Today</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number" id="topRated">0</h3>
+                        <p class="stat-label">High Rated (>80%)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number" id="uniqueRoles">0</h3>
+                        <p class="stat-label">Unique Roles</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
         {% if candidates %}
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>GitHub Username(s)</th>
-                            <th>Job Role</th>
-                            <th>Skills</th>
-                            <th>Date Added</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for candidate in candidates %}
-                            <tr>
-                                <td>{{ candidate.id }}</td>
-                                <td>{{ candidate.github_usernames }}</td>
-                                <td>{{ candidate.job_role }}</td>
-                                <td>{{ candidate.skills }}</td>
-                                <td>{{ candidate.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
-                                <td>
-                                    <a href="{{ url_for('main.visualization', candidate_id=candidate.id) }}" class="btn btn-primary btn-sm">View Analysis</a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <!-- Grid View -->
+            <div class="grid-container" id="gridView">
+                <div class="grid-header mb-4">
+                    <div class="grid-title">
+                        <h4>
+                            <i class="fas fa-th me-2"></i>
+                            Candidate Analysis Results
+                        </h4>
+                        <span class="result-count" id="resultCount">{{ candidates|length }} candidates</span>
+                    </div>
+                    <div class="bulk-actions">
+                        <input type="checkbox" id="selectAll" class="form-check-input me-2">
+                        <label for="selectAll" class="form-check-label me-3">Select All</label>
+                    </div>
+                </div>
+                
+                <div class="row g-4" id="candidatesGrid">
+                    {% for candidate in candidates %}
+                        <div class="col-lg-4 col-md-6 candidate-item" data-candidate-id="{{ candidate.id }}">
+                            <div class="candidate-card">
+                                <div class="card-header">
+                                    <div class="candidate-info">
+                                        <div class="avatar-group">
+                                            {% set usernames = candidate.github_usernames.split(',') if ',' in candidate.github_usernames else [candidate.github_usernames] %}
+                                            {% for username in usernames[:2] %}
+                                                <div class="avatar">
+                                                    <i class="fab fa-github"></i>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="candidate-details">
+                                            <h6 class="candidate-name">{{ candidate.github_usernames.split(',')[0] if ',' in candidate.github_usernames else candidate.github_usernames }}</h6>
+                                            <span class="candidate-role">{{ candidate.job_role }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-actions">
+                                        <input type="checkbox" class="form-check-input row-checkbox" value="{{ candidate.id }}">
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="skills-section">
+                                        <h6>Skills</h6>
+                                        <div class="skills-tags">
+                                            {% if candidate.skills %}
+                                                {% for skill in candidate.skills.split(',')[:4] %}
+                                                    <span class="skill-tag">{{ skill.strip() }}</span>
+                                                {% endfor %}
+                                                {% if candidate.skills.split(',')|length > 4 %}
+                                                    <span class="more-skills">+{{ candidate.skills.split(',')|length - 4 }} more</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="no-skills">No skills data</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="analysis-date">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ candidate.created_at.strftime('%B %d, %Y') }}
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <a href="{{ url_for('main.visualization', candidate_id=candidate.id) }}"
+                                        class="btn btn-primary btn-sm">
+                                        <i class="fas fa-chart-line me-1"></i>View Analysis
+                                    </a>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteCandidate({{ candidate.id }})">
+                                        <i class="fas fa-trash me-1"></i>Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         {% else %}
-            <div class="alert alert-info">
-                No candidates have been analyzed yet. <a href="{{ url_for('main.single_candidate') }}">Analyze a candidate</a> to get started.
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-users-slash"></i>
+                </div>
+                <h3 class="empty-title">No Candidates Analyzed Yet</h3>
+                <p class="empty-description">
+                    Start analyzing candidates to see them listed here. You can analyze individual candidates 
+                    or multiple candidates at once.
+                </p>
+                <div class="empty-actions">
+                    <a href="{{ url_for('main.single_candidate') }}" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i>Analyze Single Candidate
+                    </a>
+                    <a href="{{ url_for('main.multi_candidate') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-users me-2"></i>Analyze Multiple Candidates
+                    </a>
+                </div>
             </div>
         {% endif %}
     </div>
 </div>
 
-<div class="mt-4">
-    <a href="{{ url_for('main.single_candidate') }}" class="btn btn-primary">Analyze Single Candidate</a>
-    <a href="{{ url_for('main.multi_candidate') }}" class="btn btn-success">Analyze Multiple Candidates</a>
-</div>
+<style>
+/* Candidates Page Styles */
+.candidates-page {
+    padding: 120px 0 60px;
+    min-height: 100vh;
+}
+
+.page-header {
+    margin-bottom: 3rem;
+}
+
+.header-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--gradient-primary);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+    color: var(--bg-primary);
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Controls Section */
+.controls-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.search-wrapper {
+    position: relative;
+}
+
+.search-input {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    padding-right: 3rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    background: var(--bg-secondary);
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 0.2rem rgba(0, 255, 136, 0.25);
+    color: var(--text-primary);
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.filter-select {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+}
+
+.filter-select:focus {
+    background: var(--bg-secondary);
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 0.2rem rgba(0, 255, 136, 0.25);
+    color: var(--text-primary);
+}
+
+.filter-select option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-buttons .btn {
+    white-space: nowrap;
+}
+
+/* Stats Section */
+.stats-section {
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    border-color: var(--primary-green);
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 255, 136, 0.1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-green);
+    font-size: 1.2rem;
+    margin-right: 1rem;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Grid View */
+.grid-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.grid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.grid-title h4 {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.result-count {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.bulk-actions {
+    display: flex;
+    align-items: center;
+}
+
+.candidate-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.candidate-card:hover {
+    border-color: var(--primary-green);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.candidate-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.candidate-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.avatar-group {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.avatar-group .avatar {
+    width: 32px;
+    height: 32px;
+    background: var(--gradient-primary);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bg-primary);
+    font-size: 0.9rem;
+}
+
+.candidate-name {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.candidate-role {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.candidate-card .card-body {
+    padding: 1rem;
+}
+
+.skills-section h6 {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.skills-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+.skills-tags .skill-tag {
+    background: rgba(0, 255, 136, 0.1);
+    color: var(--primary-green);
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    border: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.more-skills {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-style: italic;
+}
+
+.no-skills {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.8rem;
+}
+
+.analysis-date {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.candidate-card .card-footer {
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    display: flex;
+    gap: 0.5rem;
+}
+
+.candidate-card .card-footer .btn {
+    flex: 1;
+    font-size: 0.8rem;
+    padding: 0.5rem;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.empty-icon {
+    width: 100px;
+    height: 100px;
+    background: rgba(0, 255, 136, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    font-size: 2.5rem;
+    color: var(--primary-green);
+}
+
+.empty-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.empty-description {
+    color: var(--text-secondary);
+    max-width: 500px;
+    margin: 0 auto 2rem;
+    line-height: 1.6;
+}
+
+.empty-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .grid-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 768px) {
+    .candidates-page {
+        padding: 100px 0 40px;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .controls-section {
+        padding: 1rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+    
+    .stats-section .row {
+        gap: 0.5rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    .empty-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .empty-actions .btn {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 576px) {
+    .header-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .page-title {
+        font-size: 1.75rem;
+    }
+    
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .stat-icon {
+        margin-right: 0;
+    }
+    
+    .grid-container {
+        padding: 1rem;
+    }
+}
+
+/* Form Controls */
+.form-control,
+.form-select {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background: var(--bg-secondary);
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 0.2rem rgba(0, 255, 136, 0.25);
+    color: var(--text-primary);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-green);
+    border-color: var(--primary-green);
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 255, 136, 0.25);
+}
+
+/* Button Styles */
+.btn-primary {
+    background: var(--gradient-primary);
+    border: none;
+    color: var(--bg-primary);
+}
+
+.btn-primary:hover {
+    background: var(--gradient-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+}
+
+.btn-outline-primary {
+    border: 1px solid var(--primary-green);
+    color: var(--primary-green);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-green);
+    color: var(--bg-primary);
+}
+
+.btn-outline-secondary {
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-outline-danger {
+    border: 1px solid #ff4444;
+    color: #ff4444;
+    background: transparent;
+}
+
+.btn-outline-danger:hover {
+    background: #ff4444;
+    color: var(--text-primary);
+}
+
+.btn-success {
+    background: var(--primary-green);
+    border: none;
+    color: var(--bg-primary);
+}
+
+.btn-success:hover {
+    background: var(--secondary-green);
+    color: var(--bg-primary);
+}
+</style>
+
+<script>
+// Candidates List JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const roleFilter = document.getElementById('roleFilter');
+    const dateFilter = document.getElementById('dateFilter');
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const candidatesGrid = document.getElementById('candidatesGrid');
+    
+    // Search functionality
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            filterCandidates();
+        });
+    }
+    
+    // Filter functionality
+    if (roleFilter) {
+        roleFilter.addEventListener('change', function() {
+            filterCandidates();
+        });
+    }
+    
+    if (dateFilter) {
+        dateFilter.addEventListener('change', function() {
+            filterCandidates();
+        });
+    }
+    
+    // Select all functionality
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            const isChecked = this.checked;
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+            });
+            
+            updateDeleteButton();
+        });
+    }
+    
+    // Individual checkbox handling
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('row-checkbox')) {
+            updateDeleteButton();
+            updateSelectAllState();
+        }
+    });
+    
+    // Filter candidates function
+    function filterCandidates() {
+        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+        const roleFilterValue = roleFilter ? roleFilter.value.toLowerCase() : '';
+        const dateFilterValue = dateFilter ? dateFilter.value : '';
+        
+        const candidateItems = document.querySelectorAll('.candidate-item');
+        let visibleCount = 0;
+        
+        candidateItems.forEach(item => {
+            const candidateName = item.querySelector('.candidate-name').textContent.toLowerCase();
+            const candidateRole = item.querySelector('.candidate-role').textContent.toLowerCase();
+            const skillsText = item.querySelector('.skills-tags').textContent.toLowerCase();
+            const dateText = item.querySelector('.analysis-date').textContent;
+            
+            const matchesSearch = !searchTerm || 
+                candidateName.includes(searchTerm) || 
+                candidateRole.includes(searchTerm) || 
+                skillsText.includes(searchTerm);
+            
+            const matchesRole = !roleFilterValue || candidateRole.includes(roleFilterValue);
+            
+            const matchesDate = !dateFilterValue || checkDateFilter(dateText, dateFilterValue);
+            
+            if (matchesSearch && matchesRole && matchesDate) {
+                item.style.display = '';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        updateResultCount(visibleCount);
+    }
+    
+    // Check date filter
+    function checkDateFilter(dateText, filterValue) {
+        const dateMatch = dateText.match(/(\w+) (\d+), (\d+)/);
+        if (!dateMatch) return true;
+        
+        const date = new Date(dateMatch[0]);
+        const now = new Date();
+        
+        switch (filterValue) {
+            case 'today':
+                return date.toDateString() === now.toDateString();
+            case 'week':
+                const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                return date >= weekAgo;
+            case 'month':
+                const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                return date >= monthAgo;
+            case 'quarter':
+                const quarterAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+                return date >= quarterAgo;
+            default:
+                return true;
+        }
+    }
+    
+    // Update delete button state
+    function updateDeleteButton() {
+        if (deleteBtn) {
+            const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+            deleteBtn.disabled = checkedBoxes.length === 0;
+        }
+    }
+    
+    // Update select all state
+    function updateSelectAllState() {
+        const checkboxes = document.querySelectorAll('.row-checkbox');
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = checkboxes.length > 0 && checkedBoxes.length === checkboxes.length;
+            selectAllCheckbox.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < checkboxes.length;
+        }
+    }
+    
+    // Update result count
+    function updateResultCount(count) {
+        const resultCount = document.getElementById('resultCount');
+        if (resultCount) {
+            resultCount.textContent = `${count} candidate${count !== 1 ? 's' : ''}`;
+        }
+    }
+    
+    // Action functions
+    window.deleteSelected = function() {
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        if (checkedBoxes.length === 0) return;
+        
+        if (confirm(`Are you sure you want to delete ${checkedBoxes.length} candidate(s)?`)) {
+            // Implementation for deleting selected candidates
+            console.log('Delete selected candidates:', Array.from(checkedBoxes).map(cb => cb.value));
+        }
+    };
+    
+    window.deleteCandidate = function(candidateId) {
+        if (confirm('Are you sure you want to delete this candidate?')) {
+            // Implementation for deleting single candidate
+            console.log('Delete candidate:', candidateId);
+        }
+    };
+        
+    window.exportSelected = function() {
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        if (checkedBoxes.length === 0) {
+            alert('Please select candidates to export.');
+            return;
+        }
+        // Implementation for exporting selected candidates
+        console.log('Export selected candidates:', Array.from(checkedBoxes).map(cb => cb.value));
+    };
+    
+    // Initialize stats (you can replace with real data)
+    updateStats();
+    
+    function updateStats() {
+        const candidates = document.querySelectorAll('.candidate-item');
+        const today = new Date().toDateString();
+        
+        let todayCount = 0;
+        let highRatedCount = 0;
+        const roles = new Set();
+        
+        candidates.forEach(item => {
+            const dateText = item.querySelector('.analysis-date').textContent;
+            const dateMatch = dateText.match(/(\w+) (\d+), (\d+)/);
+            
+            if (dateMatch) {
+                const date = new Date(dateMatch[0]);
+                if (date.toDateString() === today) {
+                    todayCount++;
+                }
+            }
+            
+            // Mock high rating check (you can implement real logic)
+            if (Math.random() > 0.7) {
+                highRatedCount++;
+            }
+            
+            const role = item.querySelector('.candidate-role').textContent.trim();
+            roles.add(role);
+        });
+        
+        document.getElementById('todayAnalyses').textContent = todayCount;
+        document.getElementById('topRated').textContent = highRatedCount;
+        document.getElementById('uniqueRoles').textContent = roles.size;
+    }
+});
+</script>
 {% endblock %}
