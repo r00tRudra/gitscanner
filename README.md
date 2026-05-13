@@ -2,7 +2,7 @@
 
 An AI-powered recruitment tool that analyzes GitHub profiles to assess technical skills, coding strengths, and role fit. GitScanner helps recruiters, founders, and hiring managers gain deep insights into candidates' coding styles, activities, and expertise using public GitHub profile data.
 
-## 🎯 Features
+##  Features
 
 - **GitHub Profile Analysis**: Extract and analyze public GitHub data including repositories, commit history, and contribution patterns
 - **AI-Powered Insights**: Leverage AI to generate comprehensive technical assessments and skill evaluations
@@ -12,14 +12,14 @@ An AI-powered recruitment tool that analyzes GitHub profiles to assess technical
 - **Responsive Web Interface**: User-friendly UI for easy navigation and result viewing
 - **Docker Support**: Easy deployment with containerized setup
 
-## 📋 Prerequisites
+##  Prerequisites
 
 - Python 3.8+
 - GitHub API Token (for accessing public GitHub data)
 - API keys for AI services (if using external AI providers)
 - Docker (optional, for containerized deployment)
 
-## 🚀 Installation
+##  Installation
 
 ### Local Setup
 
@@ -64,7 +64,7 @@ An AI-powered recruitment tool that analyzes GitHub profiles to assess technical
    docker run -p 5000:5000 --env-file .env gitscanner:latest
    ```
 
-## ⚙️ Configuration
+##  Configuration
 
 ### Environment Variables
 
@@ -91,7 +91,7 @@ prompts:
     Evaluate the candidate's fit for...
 ```
 
-## 📖 Usage
+##  Usage
 
 ### Web Interface
 
@@ -124,7 +124,7 @@ Content-Type: application/json
 GET /api/report/<candidate_id>
 ```
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 gitscanner/
@@ -153,7 +153,7 @@ gitscanner/
 └── README.md            # This file
 ```
 
-## 🛠️ Development
+##  Development
 
 ### Setting up Development Environment
 
@@ -211,14 +211,14 @@ services:
 
 Run with: `docker-compose up`
 
-## 🔐 Security Considerations
+##  Security Considerations
 
 - **API Token Security**: Never commit `.env` files or expose API tokens
 - **GitHub Rate Limits**: Be aware of GitHub API rate limits when processing multiple candidates
 - **Data Privacy**: Ensure compliance with privacy regulations when storing candidate data
 - **Input Validation**: Validate all user inputs to prevent injection attacks
 
-## 📊 Features in Detail
+##  Features in Detail
 
 ### Profile Analysis
 - Extracts repositories, languages, commit history
