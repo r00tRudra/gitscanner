@@ -236,7 +236,7 @@ Run with: `docker-compose up`
 - Repository statistics
 - Collaboration metrics
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions are welcome! Please follow these steps:
 
@@ -248,18 +248,18 @@ Contributions are welcome! Please follow these steps:
 
 Please ensure your code follows the project's style guide and includes appropriate tests.
 
-## 📝 License
+##  License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🆘 Support
+##  Support
 
 For issues, questions, or suggestions:
 - Open an issue on GitHub
 - Check existing issues for solutions
 - Review the documentation and examples
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - GitHub API for providing access to public profile data
 - Flask framework for web application development
